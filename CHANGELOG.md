@@ -7,19 +7,33 @@ The 2.x line was published as pre-releases while it stabilised, which meant HACS
 installed 1.0.4 on the stable channel. **From 2.11.1 onward, releases are
 published normally** and HACS offers them without enabling beta versions.
 
-## Unreleased
+## 2.27.0-beta4
 
+Pre-release: HACS offers it only with beta versions enabled.
+
+- **New `qccdz_v1` profile for the dé portable firmwares without DP 102 (#46,
+  #54).** Contributed by @BTexier. dé portable 3.5/3.7 kW units on firmware 1.1.25
+  and later use Tuya's standard EV charger layout (category `qccdz`): power,
+  current and voltage as scalar DPs 48/49/50 in tenths, session energy on DP 25 in
+  hundredths of a kWh, state on DP 38 (`evse_state`, DP 13 pilot state as
+  fallback) and the setpoint on DP 4 (1-16 A). The DP map comes from the device's
+  Tuya Thing Model and the scales are checked against real dumps. Like DP 102,
+  DP 48/49 keep their last reading after unplugging, so they only count while
+  charging. A charge is started and stopped through DP 35 (`charge` / `disabled`),
+  as the dé app does: DP 18 is echoed but does not stop a running session. The
+  profile assistant now suggests it. **Existing installs on these firmwares must
+  pick `qccdz_v1` under the integration options.**
 - **`qccdz_v1` no longer caps a 32 A charger at 16 A.** That layout has no DP 152
   to report the charger's own limit, so 16 A was assumed and the circuit-rating
   option could only lower it. A non-zero *Maximum charge current* now replaces the
   16 A default on this profile, up to 32 A.
-- **Czech translation (#51).** Contributed by @vsajer: every key of the English
-  file, with the `{placeholders}` intact.
-- **The French config flow was missing.** `fr.json` had no entry for the mode,
-  scan, cloud, cloud-device and credentials steps, so a French Home Assistant
-  showed a mix of an old form and English fallbacks. They are translated now,
-  and a test checks that every locale has exactly the English keys and
-  placeholders, so a new string can no longer ship in one language only.
+- **Entities whose DP the profile lacks are disabled once**, the same way as the
+  unwired phases and NFC: *Restart*, *Ready to charge* and the charging schedule
+  (switch and both times) on `qccdz_v1`. The schedule DP (151) is now part of the
+  profile, so a firmware without it is never written to.
+- **Per-vehicle energy was never attributed** when no active vehicle had been
+  stored: the select showed the first vehicle but the tracker kept none. Setup now
+  makes the tracker agree with the select.
 - **A short clash over the charger's single connection no longer ends in a
   permanent outage (#52).** Three undecryptable polls (30 s at a 10 s interval)
   raised the "re-enter the local key" banner, and Home Assistant stops polling a
@@ -27,19 +41,13 @@ published normally** and HACS offers them without enabling beta versions.
   in again -- the same key. The banner now needs the replies to stay unreadable
   for 10 minutes as well; until then the poll keeps retrying. The connection
   health report gained `undecryptable_for_s` to tell the two cases apart.
-- **New `qccdz_v1` profile for the dé portable firmwares without DP 102 (#46).**
-  dé portable 3.5/3.7 kW units on firmware 1.1.25 and later use Tuya's standard EV
-  charger layout (category `qccdz`): power, current and voltage as scalar DPs
-  48/49/50 in tenths, session energy on DP 25 in hundredths of a kWh, state on
-  DP 38 (`evse_state`, DP 13 pilot state as fallback), on/off on DP 18 and the
-  setpoint on DP 4 (1–16 A). The DP map comes from the device's Tuya Thing Model
-  and the scales are checked against the dumps in #46. Like DP 102, DP 48/49 keep
-  their last reading after unplugging, so they only count while charging. The
-  profile assistant now suggests it.
-- **Entities whose DP the profile lacks are disabled once**, the same way as the
-  unwired phases and NFC: *Restart*, *Ready to charge* and the charging schedule
-  (switch and both times) on `qccdz_v1`. The schedule DP (151) is now part of the
-  profile, so a firmware without it is never written to.
+- **Czech translation (#51).** Contributed by @vsajer: every key of the English
+  file, with the `{placeholders}` intact.
+- **The French config flow was missing.** `fr.json` had no entry for the mode,
+  scan, cloud, cloud-device and credentials steps, so a French Home Assistant
+  showed a mix of an old form and English fallbacks. They are translated now,
+  and a test checks that every locale has exactly the English keys and
+  placeholders, so a new string can no longer ship in one language only.
 
 ## 2.27.0-beta3
 
