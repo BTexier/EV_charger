@@ -615,7 +615,7 @@ charging, instead of holding the last value.
 | `surplus_sensor_entity_id`, `surplus_sensor_inverted` | Grid power sensor and its sign |
 | `surplus_start_threshold_w`, `surplus_stop_threshold_w` | Start/stop thresholds |
 | `surplus_restart_lock_min` | Minutes to wait after a surplus stop before the next surplus start (default 5, 0 = none). Bounds the contactor cycles when the surplus hovers around the threshold (#75) |
-| `surplus_stay_at_min_current` | Off by default. When on, a charge that the surplus can no longer pay for carries on at the minimum current instead of stopping, and a charge can start on a surplus below the minimum current; the difference is imported from the grid. The battery floor, session limits and a pause still stop it (#75) |
+| `surplus_stay_at_min_current` | Off by default. When on, a charge that the surplus can no longer pay for carries on at the minimum current instead of stopping, and a charge can start on a surplus below the minimum current; the difference is imported from the grid. It still stops when the surplus falls to the stop threshold, so set that threshold to what you accept to import (for instance equal to the start threshold). The battery floor, session limits and a pause also stop it (#75, #72) |
 | `surplus_charge_in_off_peak` | Off by default. When on, an off-peak window also drives a grid charge in surplus mode, with or without a battery sensor; outside the window the surplus rules again (#43) |
 | `surplus_curtailment_sensor_entity_id`, `surplus_curtailment_sensor_inverted` | Optional, enables `zero_injection` |
 | `surplus_battery_soc_sensor_entity_id` | Optional battery SOC |
