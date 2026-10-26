@@ -64,7 +64,7 @@ You can also get the `local_key` with the [Tuya Local Key add-on](https://github
 
 [![Open your Home Assistant instance and show the app store with a specific repository URL pre-filled.](https://my.home-assistant.io/badges/supervisor_store.svg)](https://my.home-assistant.io/redirect/supervisor_store/?repository_url=https://github.com/vineetchoudhary/tuya-local-key)
 
-**French illustrated setup guide:** [Installing a dé portable charger in Home Assistant](docs/fr-de-ev-charger/guide-fr.md) (Smart Life, Tuya Local Key, local setup and alternative Tuya Cloud method).
+**Illustrated setup guide for the dé portable charger** (Smart Life, Tuya Local Key, local setup and alternative Tuya Cloud method): [English](docs/fr-de-ev-charger/guide-en.md) · [Français](docs/fr-de-ev-charger/guide-fr.md).
 
 `local_key` is a secret, and it **changes if you re-pair or reset the charger**.
 
@@ -613,7 +613,7 @@ charging, instead of holding the last value.
 | `surplus_sensor_entity_id`, `surplus_sensor_inverted` | Grid power sensor and its sign |
 | `surplus_start_threshold_w`, `surplus_stop_threshold_w` | Start/stop thresholds |
 | `surplus_restart_lock_min` | Minutes to wait after a surplus stop before the next surplus start (default 5, 0 = none). Bounds the contactor cycles when the surplus hovers around the threshold (#75) |
-| `surplus_stay_at_min_current` | Off by default. When on, a charge that the surplus can no longer pay for carries on at the minimum current instead of stopping, and a charge can start on a surplus below the minimum current; the difference is imported from the grid. The battery floor, session limits and a pause still stop it (#75) |
+| `surplus_stay_at_min_current` | Off by default. When on, a charge that the surplus can no longer pay for carries on at the minimum current instead of stopping, and a charge can start on a surplus below the minimum current; the difference is imported from the grid. It still stops when the surplus falls to the stop threshold, so set that threshold to what you accept to import (for instance equal to the start threshold). The battery floor, session limits and a pause also stop it (#75, #72) |
 | `surplus_charge_in_off_peak` | Off by default. When on, an off-peak window also drives a grid charge in surplus mode, with or without a battery sensor; outside the window the surplus rules again (#43) |
 | `surplus_curtailment_sensor_entity_id`, `surplus_curtailment_sensor_inverted` | Optional, enables `zero_injection` |
 | `surplus_battery_soc_sensor_entity_id` | Optional battery SOC |

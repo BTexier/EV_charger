@@ -861,6 +861,7 @@ def test_staying_at_the_minimum_current_replaces_the_surplus_stop():
 
     ctx = _charging(
         available_surplus_w=500.0,
+        stop_threshold_w=400.0,
         max_supported_current=2,
         current_target=6,
         target_current=6,
@@ -877,6 +878,7 @@ def test_staying_at_the_minimum_walks_a_higher_current_down_to_it():
 
     ctx = _charging(
         available_surplus_w=500.0,
+        stop_threshold_w=400.0,
         max_supported_current=2,
         current_target=12,
         target_current=6,
@@ -895,6 +897,7 @@ def test_staying_at_the_minimum_still_stops_on_the_battery_floor_and_session_lim
     timers = _timers()
     base = _charging(
         available_surplus_w=500.0,
+        stop_threshold_w=400.0,
         max_supported_current=2,
         stay_at_min_current=True,
         battery_ready=False,
@@ -909,11 +912,53 @@ def test_staying_at_the_minimum_still_stops_on_the_battery_floor_and_session_lim
             stay_at_min_current=True,
             session_limit_reason=DecisionReason.SESSION_LIMIT_ENERGY,
             available_surplus_w=500.0,
+            stop_threshold_w=400.0,
             max_supported_current=2,
         ),
         _timers(),
     )
     assert limited.reason is DecisionReason.STOP_DELAY_PENDING
+
+
+def test_staying_at_the_minimum_still_stops_below_the_stop_threshold():
+    """#72: start at 750 W, charge at 6 A in between, stop under 750 W."""
+    from tuya_ev_charger.charge_gates import DecisionReason, GateAction
+
+    timers = _timers()
+    base = _charging(
+        start_threshold_w=750.0,
+        stop_threshold_w=750.0,
+        available_surplus_w=700.0,
+        max_supported_current=3,
+        current_target=6,
+        target_current=6,
+        stay_at_min_current=True,
+    )
+    pending = _run(base, timers)
+    assert pending.reason is DecisionReason.STOP_DELAY_PENDING
+
+    stopped = _run(_ctx(**{**_fields(base), "now": 1061.0}), timers)
+    assert stopped.action is GateAction.STOP_CHARGE
+    assert stopped.reason is DecisionReason.BELOW_STOP_THRESHOLD
+
+
+def test_staying_at_the_minimum_keeps_charging_between_the_threshold_and_the_minimum_current():
+    from tuya_ev_charger.charge_gates import DecisionReason, GateAction
+
+    verdict = _run(
+        _charging(
+            start_threshold_w=750.0,
+            stop_threshold_w=750.0,
+            available_surplus_w=900.0,
+            max_supported_current=3,
+            current_target=6,
+            target_current=6,
+            stay_at_min_current=True,
+        )
+    )
+
+    assert verdict.action is GateAction.HOLD
+    assert verdict.reason is DecisionReason.HOLDING_MINIMUM_CURRENT
 
 
 def test_staying_at_the_minimum_starts_on_a_surplus_below_the_minimum_current():

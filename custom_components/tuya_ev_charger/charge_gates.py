@@ -220,7 +220,8 @@ class GateContext:
     # Seconds to wait after a surplus stop before a surplus start (#75); 0 = none.
     restart_lock_s: float = 0.0
     # Keep charging at the minimum current instead of stopping when the surplus
-    # cannot pay for it (#75). The difference is imported from the grid.
+    # cannot pay for it (#75), down to the stop threshold. The difference is
+    # imported from the grid.
     stay_at_min_current: bool = False
     # Charge from the grid during an off-peak window even in surplus mode (#43).
     charge_in_off_peak: bool = False
@@ -576,12 +577,12 @@ def _stop_reason(ctx: GateContext) -> DecisionReason | None:
         return ctx.session_limit_reason
     if not ctx.battery_ready:
         return DecisionReason.BATTERY_SOC_BELOW_THRESHOLD
-    if ctx.stay_at_min_current:
-        # The surplus only decides the current above the minimum, never whether
-        # the charge ends: the battery floor and the session limits still do.
-        return None
     if ctx.available_surplus_w <= ctx.stop_threshold_w:
         return DecisionReason.BELOW_STOP_THRESHOLD
+    if ctx.stay_at_min_current:
+        # Between the stop threshold and the surplus that pays for the minimum
+        # current, the charge carries on at the minimum and imports the difference.
+        return None
     if ctx.max_supported_current < ctx.min_current:
         return DecisionReason.INSUFFICIENT_SURPLUS_CURRENT
     return None

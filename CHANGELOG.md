@@ -7,6 +7,22 @@ The 2.x line was published as pre-releases while it stabilised, which meant HACS
 installed 1.0.4 on the stable channel. **From 2.11.1 onward, releases are
 published normally** and HACS offers them without enabling beta versions.
 
+## 2.27.0-beta8
+
+Pre-release: HACS offers it only with beta versions enabled.
+
+- **Staying at the minimum current now stops at the stop threshold (#72).** Reported
+  by @alexkoel1958: with a start threshold of 750 W, `surplus_stay_at_min_current`
+  kept the charge going at 6 A whatever the surplus, because it ignored the stop
+  threshold. It now only skips the check that the surplus can pay for the minimum
+  current: the charge starts at the start threshold, runs at the minimum current in
+  between, and stops once the surplus falls to the stop threshold. Set the stop
+  threshold to the surplus below which you do not want to import from the grid.
+- **English version of the dé charger setup guide (#55).** The illustrated guide
+  written by @tiiiit74 (Smart Life pairing, `local_key`, first test in Home
+  Assistant, Tuya Cloud alternative) is now also available in English, with links
+  between the two versions and from the README.
+
 ## 2.27.0-beta7
 
 Pre-release: HACS offers it only with beta versions enabled.
