@@ -425,10 +425,9 @@ class TuyaEVChargerDataUpdateCoordinator(DataUpdateCoordinator[EVMetrics]):
             return
         duration_s = metrics.last_session_duration_s
         energy_kwh = metrics.last_session_energy_kwh
-        has_record = duration_s is not None and energy_kwh is not None
         try:
             if not self._session_log_primed:
-                if has_record:
+                if duration_s is not None and energy_kwh is not None:
                     # First result of this run: the charger's stored session may
                     # predate it by weeks, and logging it would invent a session
                     # that just happened.
@@ -441,7 +440,11 @@ class TuyaEVChargerDataUpdateCoordinator(DataUpdateCoordinator[EVMetrics]):
                     # the session it is watching would be noted, not logged.
                     self._session_log_primed = True
                 return
-            if not has_record or not history.is_new_session(duration_s, energy_kwh):
+            if (
+                duration_s is None
+                or energy_kwh is None
+                or not history.is_new_session(duration_s, energy_kwh)
+            ):
                 return
             record = self._build_session_record(metrics, duration_s, energy_kwh)
             await history.async_record(record)
@@ -456,7 +459,7 @@ class TuyaEVChargerDataUpdateCoordinator(DataUpdateCoordinator[EVMetrics]):
         without one is incomplete and priming on it would let a late, old DP 105
         pass as new. The qccdz clock fills the result only at unplug.
         """
-        profile = self.entry.options.get(
+        profile: str = self.entry.options.get(
             CONF_CHARGER_PROFILE,
             self.entry.data.get(CONF_CHARGER_PROFILE, DEFAULT_CHARGER_PROFILE),
         )
